@@ -135,7 +135,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-
         return {
             map: map,
             start: entryPoint,
@@ -299,18 +298,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Xử lý sự kiện click/touch cho các nút điều khiển di động
-    // THAY ĐỔI CƠ BẢN Ở ĐÂY: Thêm 'touchstart' với e.preventDefault()
+    // **THAY ĐỔI Ở ĐÂY:** Chỉ sử dụng 'touchstart' và `e.preventDefault()`.
+    // Bỏ qua 'click' listener trên di động để tránh xung đột và đảm bảo phản hồi nhanh.
+    // Đối với desktop, 'click' vẫn hoạt động tự nhiên.
+
     upBtn.addEventListener('touchstart', (e) => { e.preventDefault(); movePlayer('up'); }, { passive: false });
-    upBtn.addEventListener('click', () => movePlayer('up'));
+    // upBtn.addEventListener('click', () => movePlayer('up')); // Bỏ hoặc chỉ dùng cho desktop
 
     downBtn.addEventListener('touchstart', (e) => { e.preventDefault(); movePlayer('down'); }, { passive: false });
-    downBtn.addEventListener('click', () => movePlayer('down'));
+    // downBtn.addEventListener('click', () => movePlayer('down'));
 
     leftBtn.addEventListener('touchstart', (e) => { e.preventDefault(); movePlayer('left'); }, { passive: false });
-    leftBtn.addEventListener('click', () => movePlayer('left'));
+    // leftBtn.addEventListener('click', () => movePlayer('left'));
 
     rightBtn.addEventListener('touchstart', (e) => { e.preventDefault(); movePlayer('right'); }, { passive: false });
-    rightBtn.addEventListener('click', () => movePlayer('right'));
+    // rightBtn.addEventListener('click', () => movePlayer('right'));
+
+    // Để đảm bảo click vẫn hoạt động trên desktop, bạn có thể thêm lại `click` listeners
+    // nhưng hãy cẩn thận với môi trường mobile nơi `touchstart` đã kích hoạt hành động.
+    // Một cách tốt hơn là chỉ nghe `click` nếu không phải là thiết bị cảm ứng.
+    if (!('ontouchstart' in window)) { // Kiểm tra đơn giản xem có hỗ trợ cảm ứng không
+        upBtn.addEventListener('click', () => movePlayer('up'));
+        downBtn.addEventListener('click', () => movePlayer('down'));
+        leftBtn.addEventListener('click', () => movePlayer('left'));
+        rightBtn.addEventListener('click', () => movePlayer('right'));
+    }
 
 
     // Khởi tạo mê cung và vị trí người chơi khi tải trang
