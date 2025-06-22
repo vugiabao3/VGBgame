@@ -8,6 +8,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const MAZE_SIZE = 51; // Kích thước mỗi mê cung (ví dụ: 51x51) - Tăng kích thước để phức tạp hơn
     const NUM_MAZES = 30; // Số lượng mê cung
 
+    // Lấy các nút điều khiển di động
+    const upBtn = document.getElementById('up-btn');
+    const downBtn = document.getElementById('down-btn');
+    const leftBtn = document.getElementById('left-btn');
+    const rightBtn = document.getElementById('right-btn');
+
     // Hàm tạo mê cung ngẫu nhiên phức tạp hơn (sử dụng Prim's Algorithm cải tiến)
     function generateAdvancedMaze(rows, cols) {
         // Khởi tạo tất cả là tường
@@ -20,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
         map[startR][startC] = 0; // Đặt điểm bắt đầu là đường đi
 
         let frontier = []; // Danh sách các tường "biên giới"
-        
+
         // Thêm các ô tường lân cận (cách 2 đơn vị) vào danh sách frontier
         const addNeighborsToFrontier = (r, c) => {
             const directions = [
@@ -42,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
         while (frontier.length > 0) {
             // Chọn ngẫu nhiên một ô từ danh sách frontier
             const randomIndex = Math.floor(Math.random() * frontier.length);
-            const [r, c] = frontier.splice(randomIndex, 1)[0]; 
+            const [r, c] = frontier.splice(randomIndex, 1)[0];
 
             const visitedNeighbors = [];
             const directions = [
@@ -61,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (visitedNeighbors.length > 0) {
                 // Chọn ngẫu nhiên một hàng xóm đã được thăm
                 const [targetR, targetC] = visitedNeighbors[Math.floor(Math.random() * visitedNeighbors.length)];
-                
+
                 // Phá tường giữa ô hiện tại (r,c) và ô hàng xóm đã thăm (targetR, targetC)
                 map[r][c] = 0; // Biến ô tường thành đường đi
                 map[r + (targetR - r) / 2][c + (targetC - c) / 2] = 0; // Phá tường ở giữa
@@ -90,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         if (map[exitPoint[0]][exitPoint[1]] === 1) {
-             for (let i = rows - 2; i > 0; i--) {
+            for (let i = rows - 2; i > 0; i--) {
                 if (map[i][cols - 2] === 0) {
                     exitPoint = [i, cols - 2];
                     break;
@@ -123,8 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (c < cols-1 && map[r][c+1] === 0) pathNeighbors++;
 
                 // Phá tường nếu nó nối ít nhất 2 đường đi (tạo ngã ba/vòng lặp)
-                if (pathNeighbors >= 2) { 
-                    map[r][c] = 0; 
+                if (pathNeighbors >= 2) {
+                    map[r][c] = 0;
                 }
             }
         }
@@ -205,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentMazeIndex++; // Chuyển sang bản đồ tiếp theo
             if (currentMazeIndex < mazeMaps.length) {
                 currentMazeData = mazeMaps[currentMazeIndex]; // Cập nhật dữ liệu bản đồ hiện tại
-                
+
                 // Cập nhật lại kích thước mê cung (nếu các mê cung có thể khác kích thước)
                 const newNumRows = currentMazeData.map.length;
                 const newNumCols = currentMazeData.map[0].length;
@@ -222,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Có thể thêm logic để reset game hoặc hiển thị màn hình kết thúc
                 currentMazeIndex = 0; // Reset về bản đồ đầu tiên
                 currentMazeData = mazeMaps[currentMazeIndex];
-                
+
                 // Cập nhật lại kích thước mê cung cho bản đồ đầu tiên
                 const firstNumRows = currentMazeData.map.length;
                 const firstNumCols = currentMazeData.map[0].length;
@@ -237,30 +243,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Xử lý sự kiện nhấn phím để di chuyển người chơi
-    document.addEventListener('keydown', (e) => {
+    // Hàm xử lý di chuyển người chơi
+    function movePlayer(direction) {
         let newPlayerX = playerX;
         let newPlayerY = playerY;
 
-        switch (e.key) {
-            case 'ArrowUp':
-            case 'w':
+        switch (direction) {
+            case 'up':
                 newPlayerY--;
                 break;
-            case 'ArrowDown':
-            case 's':
+            case 'down':
                 newPlayerY++;
                 break;
-            case 'ArrowLeft':
-            case 'a':
+            case 'left':
                 newPlayerX--;
                 break;
-            case 'ArrowRight':
-            case 'd':
+            case 'right':
                 newPlayerX++;
                 break;
-            default:
-                return; // Bỏ qua các phím khác
         }
 
         // Kiểm tra xem vị trí mới có hợp lệ không (không ra khỏi biên và không va vào tường)
@@ -272,7 +272,46 @@ document.addEventListener('DOMContentLoaded', () => {
             updatePlayerPosition();
             checkWinCondition(); // Kiểm tra điều kiện thắng sau mỗi lần di chuyển
         }
+    }
+
+    // Xử lý sự kiện nhấn phím để di chuyển người chơi (dành cho máy tính)
+    document.addEventListener('keydown', (e) => {
+        switch (e.key) {
+            case 'ArrowUp':
+            case 'w':
+                movePlayer('up');
+                break;
+            case 'ArrowDown':
+            case 's':
+                movePlayer('down');
+                break;
+            case 'ArrowLeft':
+            case 'a':
+                movePlayer('left');
+                break;
+            case 'ArrowRight':
+            case 'd':
+                movePlayer('right');
+                break;
+            default:
+                return; // Bỏ qua các phím khác
+        }
     });
+
+    // Xử lý sự kiện click/touch cho các nút điều khiển di động
+    // THAY ĐỔI CƠ BẢN Ở ĐÂY: Thêm 'touchstart' với e.preventDefault()
+    upBtn.addEventListener('touchstart', (e) => { e.preventDefault(); movePlayer('up'); }, { passive: false });
+    upBtn.addEventListener('click', () => movePlayer('up'));
+
+    downBtn.addEventListener('touchstart', (e) => { e.preventDefault(); movePlayer('down'); }, { passive: false });
+    downBtn.addEventListener('click', () => movePlayer('down'));
+
+    leftBtn.addEventListener('touchstart', (e) => { e.preventDefault(); movePlayer('left'); }, { passive: false });
+    leftBtn.addEventListener('click', () => movePlayer('left'));
+
+    rightBtn.addEventListener('touchstart', (e) => { e.preventDefault(); movePlayer('right'); }, { passive: false });
+    rightBtn.addEventListener('click', () => movePlayer('right'));
+
 
     // Khởi tạo mê cung và vị trí người chơi khi tải trang
     createMaze(currentMazeData);
