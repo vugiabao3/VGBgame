@@ -3,20 +3,20 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, #2c3e50, #34495e); /* Nền gradient tối, hiện đại */
+    background: linear-gradient(135deg, #2c3e50, #34495e);
     margin: 0;
-    overflow: hidden; /* Tránh thanh cuộn */
-    position: relative; /* Quan trọng cho việc định vị tên coder */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Font chữ đẹp hơn */
+    overflow: hidden;
+    position: relative;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 #maze-container {
     position: relative;
-    border: 3px solid #6ab04c; /* Viền xanh lá cây mềm mại hơn */
-    background-color: #3f51b5; /* Màu nền mê cung xanh đậm hơn */
-    box-shadow: 0 0 20px rgba(106, 176, 76, 0.8), 0 0 40px rgba(106, 176, 76, 0.4); /* Bóng đổ nổi bật hơn */
-    border-radius: 8px; /* Bo tròn góc container mê cung */
-    overflow: hidden; /* Đảm bảo các ô không tràn ra ngoài viền bo tròn */
+    border: 3px solid #6ab04c;
+    background-color: #3f51b5;
+    box-shadow: 0 0 20px rgba(106, 176, 76, 0.8), 0 0 40px rgba(106, 176, 76, 0.4);
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 #maze {
@@ -25,49 +25,186 @@ body {
 }
 
 .wall {
-    background-color: #4a69bd; /* Màu tường xanh đậm */
-    /* border: 1px solid #666;  Loại bỏ viền để mê cung trông mượt mà hơn */
+    background-color: #4a69bd;
 }
 
 .path {
-    background-color: #3f51b5; /* Màu đường đi xanh đậm hơn */
+    background-color: #3f51b5;
 }
 
 .start {
-    background-color: #6ab04c; /* Màu xanh lá cây tươi hơn cho điểm bắt đầu */
-    border-radius: 50%; /* Làm điểm bắt đầu tròn */
-    box-shadow: 0 0 8px rgba(106, 176, 76, 0.7); /* Bóng đổ cho điểm bắt đầu */
+    background-color: #6ab04c;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(106, 176, 76, 0.7);
 }
 
 .end {
-    background-color: #eb4d4b; /* Màu đỏ cam tươi hơn cho điểm kết thúc */
-    border-radius: 50%; /* Làm điểm kết thúc tròn */
-    box-shadow: 0 0 8px rgba(235, 77, 75, 0.7); /* Bóng đổ cho điểm kết thúc */
+    background-color: #eb4d4b;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(235, 77, 75, 0.7);
 }
 
 #player {
     position: absolute;
-    width: 15px; /* Kích thước người chơi bằng cellSize */
-    height: 15px; /* Kích thước người chơi bằng cellSize */
-    background-color: #f9ca24; /* Màu vàng sáng cho người chơi */
-    border-radius: 50%; /* Làm cho người chơi hình tròn */
-    transition: left 0.1s ease-out, top 0.1s ease-out; /* Chuyển động mượt mà hơn, "ease-out" tạo cảm giác dừng lại nhẹ nhàng */
-    box-shadow: 0 0 10px rgba(249, 202, 36, 0.9); /* Bóng đổ phát sáng cho người chơi */
-    z-index: 10; /* Đảm bảo người chơi nằm trên mê cung */
-    border: 1px solid rgba(255, 255, 255, 0.5); /* Viền sáng nhẹ cho người chơi */
+    width: 15px;
+    height: 15px;
+    background-color: #f9ca24;
+    border-radius: 50%;
+    transition: left 0.1s ease-out, top 0.1s ease-out;
+    box-shadow: 0 0 10px rgba(249, 202, 36, 0.9);
+    z-index: 10;
+    border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
-/* Style cho tên của bạn trên nền */
 #coder-name {
     position: absolute;
-    bottom: 20px; /* Di chuyển xuống dưới */
-    right: 30px; /* Cách lề phải 30px */
-    color: rgba(255, 255, 255, 0.1); /* Màu trắng trong suốt hơn nữa */
-    font-family: 'Orbitron', sans-serif; /* Font futurictic nếu có */
-    font-size: 3em; /* Kích thước font vẫn lớn */
+    bottom: 20px;
+    right: 30px;
+    color: rgba(255, 255, 255, 0.1);
+    font-family: 'Orbitron', sans-serif; /* Đảm bảo bạn đã nhúng font này hoặc thay bằng font có sẵn */
+    font-size: 3em;
     font-weight: bold;
-    text-shadow: 0 0 10px rgba(0, 255, 255, 0.3); /* Bóng đổ màu xanh nhạt */
-    pointer-events: none; /* Đảm bảo không cản trở tương tác */
-    z-index: 1; /* Nằm dưới mê cung */
-    letter-spacing: 2px; /* Khoảng cách giữa các chữ cái */
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    pointer-events: none;
+    z-index: 1;
+    letter-spacing: 2px;
+}
+
+/* Các style cho điều khiển di động */
+#mobile-controls {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    z-index: 100;
+    /* Ẩn điều khiển trên màn hình lớn */
+    @media (min-width: 768px) {
+        display: none;
+    }
+}
+
+.control-row {
+    display: flex;
+    gap: 10px;
+}
+
+.control-btn {
+    background-color: rgba(106, 176, 76, 0.7);
+    color: white; /* Màu này không còn quan trọng vì nội dung là div */
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    /* font-size: 2em; */ /* Không cần nữa vì không còn mũi tên */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    transition: background-color 0.2s, transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+    overflow: hidden; /* Quan trọng để cắt bớt animation bên trong nút */
+}
+
+.control-btn:active {
+    background-color: rgba(76, 130, 56, 0.9);
+    transform: scale(0.95);
+}
+
+/* Style cho các dấu chấm tròn bên trong nút */
+.dot-indicator {
+    width: 20px; /* Kích thước của chấm tròn */
+    height: 20px;
+    background-color: white; /* Màu của chấm tròn */
+    border-radius: 50%;
+    position: relative;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+    /* Animation xoay */
+    animation: pulse 1.5s infinite alternate ease-in-out; /* Hiệu ứng phập phồng nhẹ */
+}
+
+/* Keyframes cho hiệu ứng phập phồng */
+@keyframes pulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+
+/* Điều chỉnh vị trí của chấm tròn để tạo cảm giác di chuyển */
+.dot-indicator::before,
+.dot-indicator::after {
+    content: '';
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.5); /* Màu chấm nhỏ hơn */
+    border-radius: 50%;
+    width: 8px; /* Kích thước chấm nhỏ */
+    height: 8px;
+    opacity: 0; /* Mặc định ẩn */
+    transition: all 0.3s ease-out; /* Chuyển động mượt mà */
+}
+
+/* Vị trí ban đầu của các chấm nhỏ cho mỗi hướng */
+.dot-indicator.up::before { top: -15px; left: 50%; transform: translateX(-50%); }
+.dot-indicator.up::after { bottom: -15px; left: 50%; transform: translateX(-50%); }
+
+.dot-indicator.down::before { bottom: -15px; left: 50%; transform: translateX(-50%); }
+.dot-indicator.down::after { top: -15px; left: 50%; transform: translateX(-50%); }
+
+.dot-indicator.left::before { left: -15px; top: 50%; transform: translateY(-50%); }
+.dot-indicator.left::after { right: -15px; top: 50%; transform: translateY(-50%); }
+
+.dot-indicator.right::before { right: -15px; top: 50%; transform: translateY(-50%); }
+.dot-indicator.right::after { left: -15px; top: 50%; transform: translateY(-50%); }
+
+/* Hiệu ứng khi nhấn nút: các chấm nhỏ hiện ra và di chuyển */
+.control-btn:active .dot-indicator::before {
+    opacity: 1;
+    transform: translate(-50%, -50%) translateY(-10px); /* Dịch chuyển lên */
+}
+.control-btn:active .dot-indicator::after {
+    opacity: 1;
+    transform: translate(-50%, -50%) translateY(10px); /* Dịch chuyển xuống */
+}
+
+.control-btn:active .dot-indicator.up::before { transform: translateX(-50%) translateY(-10px); }
+.control-btn:active .dot-indicator.up::after { transform: translateX(-50%) translateY(10px); }
+
+.control-btn:active .dot-indicator.down::before { transform: translateX(-50%) translateY(10px); }
+.control-btn:active .dot-indicator.down::after { transform: translateX(-50%) translateY(-10px); }
+
+.control-btn:active .dot-indicator.left::before { transform: translateY(-50%) translateX(-10px); }
+.control-btn:active .dot-indicator.left::after { transform: translateY(-50%) translateX(10px); }
+
+.control-btn:active .dot-indicator.right::before { transform: translateY(-50%) translateX(10px); }
+.control-btn:active .dot-indicator.right::after { transform: translateY(-50%) translateX(-10px); }
+
+
+/* Điều chỉnh kích thước font cho màn hình nhỏ hơn (tùy chọn) */
+@media (max-width: 480px) {
+    #mobile-controls {
+        bottom: 10px;
+    }
+    .control-btn {
+        width: 50px;
+        height: 50px;
+    }
+    .dot-indicator {
+        width: 18px;
+        height: 18px;
+    }
+    .dot-indicator::before,
+    .dot-indicator::after {
+        width: 7px;
+        height: 7px;
+    }
 }
