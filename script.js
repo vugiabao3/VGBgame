@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const mazeElement = document.getElementById('maze');
     const playerElement = document.getElementById('player');
-    const cellSize = 15; // Giảm kích thước ô hơn nữa để mê cung lớn hơn hiển thị tốt
+    let cellSize = 15; // Kích thước ô ban đầu
     let playerX = 0; // Tọa độ X của người chơi theo ô (cột)
     let playerY = 0; // Tọa độ Y của người chơi theo ô (hàng)
 
@@ -13,6 +13,62 @@ document.addEventListener('DOMContentLoaded', () => {
     const downBtn = document.getElementById('down-btn');
     const leftBtn = document.getElementById('left-btn');
     const rightBtn = document.getElementById('right-btn');
+
+    // --- Biến và hàm mới cho phóng to/thu nhỏ ---
+    let initialPinchDistance = null;
+    let currentScale = 1;
+    const MIN_SCALE = 0.5; // Kích thước ô nhỏ nhất (tỷ lệ so với cellSize gốc)
+    const MAX_SCALE = 3.0; // Kích thước ô lớn nhất (tỷ lệ so với cellSize gốc)
+    const originalCellSize = 15; // Lưu kích thước ô ban đầu
+
+    function updateMazeAndPlayerScale() {
+        const scaledCellSize = originalCellSize * currentScale;
+
+        mazeElement.style.gridTemplateColumns = `repeat(${currentMazeData.map[0].length}, ${scaledCellSize}px)`;
+        mazeElement.style.gridTemplateRows = `repeat(${currentMazeData.map.length}, ${scaledCellSize}px)`;
+        // Không đặt width/height cố định cho mazeElement để nó co giãn theo content,
+        // hoặc đặt max-width/max-height trên một container cha.
+        // mazeElement.style.width = `${currentMazeData.map[0].length * scaledCellSize}px`;
+        // mazeElement.style.height = `${currentMazeData.map.length * scaledCellSize}px`;
+
+        playerElement.style.width = `${scaledCellSize}px`;
+        playerElement.style.height = `${scaledCellSize}px`;
+        updatePlayerPosition(scaledCellSize); // Cập nhật vị trí người chơi với cellSize mới
+    }
+
+    function getDistance(touch1, touch2) {
+        const dx = touch1.clientX - touch2.clientX;
+        const dy = touch1.clientY - touch2.clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    mazeElement.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+            initialPinchDistance = getDistance(e.touches[0], e.touches[1]);
+            // Prevent default behavior like scrolling or text selection
+            e.preventDefault();
+        }
+    }, { passive: false }); // Use passive: false to allow preventDefault
+
+    mazeElement.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2 && initialPinchDistance) {
+            const currentPinchDistance = getDistance(e.touches[0], e.touches[1]);
+            let scaleFactor = currentPinchDistance / initialPinchDistance;
+
+            // Apply scaling relative to current scale
+            currentScale = Math.min(Math.max(currentScale * scaleFactor, MIN_SCALE), MAX_SCALE);
+            initialPinchDistance = currentPinchDistance; // Update initial distance for smooth continuous scaling
+
+            updateMazeAndPlayerScale();
+            e.preventDefault(); // Prevent scrolling while pinching
+        }
+    }, { passive: false }); // Use passive: false to allow preventDefault
+
+    mazeElement.addEventListener('touchend', (e) => {
+        initialPinchDistance = null; // Reset pinch state
+    });
+
+    // --- Kết thúc phần mới cho phóng to/thu nhỏ ---
 
     // Hàm tạo mê cung ngẫu nhiên phức tạp hơn (sử dụng Prim's Algorithm cải tiến)
     function generateAdvancedMaze(rows, cols) {
@@ -78,7 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Đảm bảo lối vào và lối ra nằm ở các vị trí cố định
-        // Cần tìm một ô đường đi gần góc để đặt start/end nếu thuật toán ngẫu nhiên không tạo ra
         let entryPoint = [1, 1];
         let exitPoint = [rows - 2, cols - 2];
 
@@ -113,22 +168,17 @@ document.addEventListener('DOMContentLoaded', () => {
         map[exitPoint[0]][exitPoint[1]] = 0;
 
         // Thêm một số "nhiễu" hoặc vòng lặp nhỏ để tăng độ khó (phá thêm tường)
-        // Đây là yếu tố tăng "đánh đố 1000 lần" bằng cách tạo nhiều con đường hơn,
-        // khiến mê cung không còn là "perfect maze" mà có nhiều lối đi có thể gây nhầm lẫn
-        const numExtraPaths = Math.floor((rows * cols) / 50); // Số lượng đường đi phụ
+        const numExtraPaths = Math.floor((rows * cols) / 50);
         for (let i = 0; i < numExtraPaths; i++) {
             let r = Math.floor(Math.random() * (rows - 2)) + 1;
             let c = Math.floor(Math.random() * (cols - 2)) + 1;
-            // Chỉ phá tường nếu nó có thể tạo ra một lối đi mới giữa hai đường đi hiện có
             if (map[r][c] === 1) {
                 let pathNeighbors = 0;
-                // Kiểm tra các ô đường đi lân cận
                 if (r > 0 && map[r-1][c] === 0) pathNeighbors++;
                 if (r < rows-1 && map[r+1][c] === 0) pathNeighbors++;
                 if (c > 0 && map[r][c-1] === 0) pathNeighbors++;
                 if (c < cols-1 && map[r][c+1] === 0) pathNeighbors++;
 
-                // Phá tường nếu nó nối ít nhất 2 đường đi (tạo ngã ba/vòng lặp)
                 if (pathNeighbors >= 2) {
                     map[r][c] = 0;
                 }
@@ -150,15 +200,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentMazeIndex = 0; // Chỉ số của bản đồ hiện tại
     let currentMazeData = mazeMaps[currentMazeIndex]; // Dữ liệu bản đồ đang chơi
-
-    // Cấu hình kích thước tổng thể của mê cung
-    const numRows = currentMazeData.map.length;
-    const numCols = currentMazeData.map[0].length;
-
-    mazeElement.style.gridTemplateColumns = `repeat(${numCols}, ${cellSize}px)`;
-    mazeElement.style.gridTemplateRows = `repeat(${numRows}, ${cellSize}px)`;
-    mazeElement.style.width = `${numCols * cellSize}px`;
-    mazeElement.style.height = `${numRows * cellSize}px`;
 
     // Hàm tạo mê cung từ bản đồ đã cho
     function createMaze(mazeData) {
@@ -185,19 +226,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 mazeElement.appendChild(cell);
             }
         }
+        updateMazeAndPlayerScale(); // Cập nhật tỉ lệ khi mê cung mới được tạo
     }
 
     // Hàm đặt lại vị trí người chơi và cập nhật trên màn hình
     function resetPlayerPosition() {
         playerY = currentMazeData.start[0];
         playerX = currentMazeData.start[1];
-        updatePlayerPosition();
+        updatePlayerPosition(originalCellSize * currentScale);
     }
 
-    // Cập nhật vị trí của người chơi trên màn hình
-    function updatePlayerPosition() {
-        playerElement.style.left = `${playerX * cellSize}px`;
-        playerElement.style.top = `${playerY * cellSize}px`;
+    // Cập nhật vị trí của người chơi trên màn hình (thêm tham số cellSize)
+    function updatePlayerPosition(currentCellSize) {
+        playerElement.style.left = `${playerX * currentCellSize}px`;
+        playerElement.style.top = `${playerY * currentCellSize}px`;
     }
 
     // Hàm kiểm tra điều kiện thắng
@@ -211,31 +253,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentMazeIndex < mazeMaps.length) {
                 currentMazeData = mazeMaps[currentMazeIndex]; // Cập nhật dữ liệu bản đồ hiện tại
 
-                // Cập nhật lại kích thước mê cung (nếu các mê cung có thể khác kích thước)
-                const newNumRows = currentMazeData.map.length;
-                const newNumCols = currentMazeData.map[0].length;
-                mazeElement.style.gridTemplateColumns = `repeat(${newNumCols}, ${cellSize}px)`;
-                mazeElement.style.gridTemplateRows = `repeat(${newNumRows}, ${cellSize}px)`;
-                mazeElement.style.width = `${newNumCols * cellSize}px`;
-                mazeElement.style.height = `${newNumRows * cellSize}px`;
-
+                // Reset scale khi chuyển mê cung để tránh kích thước lạ
+                currentScale = 1;
                 createMaze(currentMazeData);
                 resetPlayerPosition();
                 alert(`Chuyển sang bản đồ tiếp theo: Mê cung ${currentMazeIndex + 1}`);
             } else {
                 alert('Bạn đã hoàn thành tất cả các mê cung! Chúc mừng!');
-                // Có thể thêm logic để reset game hoặc hiển thị màn hình kết thúc
                 currentMazeIndex = 0; // Reset về bản đồ đầu tiên
                 currentMazeData = mazeMaps[currentMazeIndex];
 
-                // Cập nhật lại kích thước mê cung cho bản đồ đầu tiên
-                const firstNumRows = currentMazeData.map.length;
-                const firstNumCols = currentMazeData.map[0].length;
-                mazeElement.style.gridTemplateColumns = `repeat(${firstNumCols}, ${cellSize}px)`;
-                mazeElement.style.gridTemplateRows = `repeat(${firstNumRows}, ${cellSize}px)`;
-                mazeElement.style.width = `${firstNumCols * cellSize}px`;
-                mazeElement.style.height = `${firstNumRows * cellSize}px`;
-
+                currentScale = 1; // Reset scale khi hoàn thành tất cả
                 createMaze(currentMazeData);
                 resetPlayerPosition();
             }
@@ -268,7 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentMazeData.map[newPlayerY][newPlayerX] === 0) { // Chỉ di chuyển nếu là đường đi
             playerX = newPlayerX;
             playerY = newPlayerY;
-            updatePlayerPosition();
+            updatePlayerPosition(originalCellSize * currentScale); // Cập nhật vị trí với cellSize hiện tại
             checkWinCondition(); // Kiểm tra điều kiện thắng sau mỗi lần di chuyển
         }
     }
@@ -298,32 +326,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Xử lý sự kiện click/touch cho các nút điều khiển di động
-    // **THAY ĐỔI Ở ĐÂY:** Chỉ sử dụng 'touchstart' và `e.preventDefault()`.
-    // Bỏ qua 'click' listener trên di động để tránh xung đột và đảm bảo phản hồi nhanh.
-    // Đối với desktop, 'click' vẫn hoạt động tự nhiên.
-
     upBtn.addEventListener('touchstart', (e) => { e.preventDefault(); movePlayer('up'); }, { passive: false });
-    // upBtn.addEventListener('click', () => movePlayer('up')); // Bỏ hoặc chỉ dùng cho desktop
-
     downBtn.addEventListener('touchstart', (e) => { e.preventDefault(); movePlayer('down'); }, { passive: false });
-    // downBtn.addEventListener('click', () => movePlayer('down'));
-
     leftBtn.addEventListener('touchstart', (e) => { e.preventDefault(); movePlayer('left'); }, { passive: false });
-    // leftBtn.addEventListener('click', () => movePlayer('left'));
-
     rightBtn.addEventListener('touchstart', (e) => { e.preventDefault(); movePlayer('right'); }, { passive: false });
-    // rightBtn.addEventListener('click', () => movePlayer('right'));
 
     // Để đảm bảo click vẫn hoạt động trên desktop, bạn có thể thêm lại `click` listeners
-    // nhưng hãy cẩn thận với môi trường mobile nơi `touchstart` đã kích hoạt hành động.
-    // Một cách tốt hơn là chỉ nghe `click` nếu không phải là thiết bị cảm ứng.
     if (!('ontouchstart' in window)) { // Kiểm tra đơn giản xem có hỗ trợ cảm ứng không
         upBtn.addEventListener('click', () => movePlayer('up'));
         downBtn.addEventListener('click', () => movePlayer('down'));
         leftBtn.addEventListener('click', () => movePlayer('left'));
         rightBtn.addEventListener('click', () => movePlayer('right'));
     }
-
 
     // Khởi tạo mê cung và vị trí người chơi khi tải trang
     createMaze(currentMazeData);
