@@ -1,0 +1,73 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #2c3e50, #34495e); /* Nền gradient tối, hiện đại */
+    margin: 0;
+    overflow: hidden; /* Tránh thanh cuộn */
+    position: relative; /* Quan trọng cho việc định vị tên coder */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Font chữ đẹp hơn */
+}
+
+#maze-container {
+    position: relative;
+    border: 3px solid #6ab04c; /* Viền xanh lá cây mềm mại hơn */
+    background-color: #3f51b5; /* Màu nền mê cung xanh đậm hơn */
+    box-shadow: 0 0 20px rgba(106, 176, 76, 0.8), 0 0 40px rgba(106, 176, 76, 0.4); /* Bóng đổ nổi bật hơn */
+    border-radius: 8px; /* Bo tròn góc container mê cung */
+    overflow: hidden; /* Đảm bảo các ô không tràn ra ngoài viền bo tròn */
+}
+
+#maze {
+    display: grid;
+    /* grid-template-columns và grid-template-rows sẽ được set bằng JS */
+}
+
+.wall {
+    background-color: #4a69bd; /* Màu tường xanh đậm */
+    /* border: 1px solid #666;  Loại bỏ viền để mê cung trông mượt mà hơn */
+}
+
+.path {
+    background-color: #3f51b5; /* Màu đường đi xanh đậm hơn */
+}
+
+.start {
+    background-color: #6ab04c; /* Màu xanh lá cây tươi hơn cho điểm bắt đầu */
+    border-radius: 50%; /* Làm điểm bắt đầu tròn */
+    box-shadow: 0 0 8px rgba(106, 176, 76, 0.7); /* Bóng đổ cho điểm bắt đầu */
+}
+
+.end {
+    background-color: #eb4d4b; /* Màu đỏ cam tươi hơn cho điểm kết thúc */
+    border-radius: 50%; /* Làm điểm kết thúc tròn */
+    box-shadow: 0 0 8px rgba(235, 77, 75, 0.7); /* Bóng đổ cho điểm kết thúc */
+}
+
+#player {
+    position: absolute;
+    width: 15px; /* Kích thước người chơi bằng cellSize */
+    height: 15px; /* Kích thước người chơi bằng cellSize */
+    background-color: #f9ca24; /* Màu vàng sáng cho người chơi */
+    border-radius: 50%; /* Làm cho người chơi hình tròn */
+    transition: left 0.1s ease-out, top 0.1s ease-out; /* Chuyển động mượt mà hơn, "ease-out" tạo cảm giác dừng lại nhẹ nhàng */
+    box-shadow: 0 0 10px rgba(249, 202, 36, 0.9); /* Bóng đổ phát sáng cho người chơi */
+    z-index: 10; /* Đảm bảo người chơi nằm trên mê cung */
+    border: 1px solid rgba(255, 255, 255, 0.5); /* Viền sáng nhẹ cho người chơi */
+}
+
+/* Style cho tên của bạn trên nền */
+#coder-name {
+    position: absolute;
+    bottom: 20px; /* Di chuyển xuống dưới */
+    right: 30px; /* Cách lề phải 30px */
+    color: rgba(255, 255, 255, 0.1); /* Màu trắng trong suốt hơn nữa */
+    font-family: 'Orbitron', sans-serif; /* Font futurictic nếu có */
+    font-size: 3em; /* Kích thước font vẫn lớn */
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.3); /* Bóng đổ màu xanh nhạt */
+    pointer-events: none; /* Đảm bảo không cản trở tương tác */
+    z-index: 1; /* Nằm dưới mê cung */
+    letter-spacing: 2px; /* Khoảng cách giữa các chữ cái */
+}
